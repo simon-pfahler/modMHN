@@ -1,0 +1,7 @@
+
+# excluding datasets directly coming from MSK
+dataset/data_clinical_patient.txt
+dataset/data_clinical_sample.txt
+
+# for now exclude permutation test results
+post_analysis/perm_test_results**.txt
