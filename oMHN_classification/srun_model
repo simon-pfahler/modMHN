@@ -1,0 +1,6 @@
+#!/bin/bash
+
+##SBATCH configuration here
+
+python -u ./learn_approx_omhn.py $1 $2
+

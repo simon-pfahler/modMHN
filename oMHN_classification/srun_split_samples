@@ -1,0 +1,6 @@
+#!/bin/bash
+
+##SBATCH configuration here
+
+python -u ./split_samples.py
+
