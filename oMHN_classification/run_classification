@@ -1,4 +1,4 @@
 #!/bin/bash
 
-nohup python -u ./warden.py > warden_log.txt 2>&1 &
+python -u ./warden.py
 
