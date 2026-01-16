@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
@@ -34,39 +35,13 @@ Ps_CBN = np.loadtxt(
 )
 # <<< get membership probabilities
 
-# >>> permute groups
-mbs = data.sum(axis=1)
-
-
-def sort_groups(Ps):
-    mbs_groups = np.zeros(Ps.shape[0])
-    nr_samples_groups = np.zeros(Ps.shape[0])
-    for i in range(mbs.shape[0]):
-        group = np.argmax(Ps[:, i])
-        mbs_groups[group] += mbs[i]
-        nr_samples_groups[group] += 1
-    sorted_indices = np.argsort(mbs_groups / nr_samples_groups)[::-1]
-
-    return Ps[sorted_indices]
-
-
-Ps_MHN = sort_groups(Ps_MHN)
-Ps_CBN = sort_groups(Ps_CBN)
-Ps_baserate = sort_groups(Ps_baserate)
-# <<< permute groups
-
-delta_MHN = 0
-delta_CBN = 0
-delta_baserate = 0
-nr_pairings = 0
-
-# [((sample_a), (sample_b))]
-steps_considered = list()
+delta_MHN = list()
+delta_CBN = list()
+delta_baserate = list()
 
 
 def comp(p1, p2):
-    m = (p1 + p2) / 2
-    return 0.5 * np.sum(p1 * np.log(p1 / m) + p2 * np.log(p2 / m))
+    return np.sum(p1 * np.log(p1 / p2))  # KL divergence
 
 
 for sample_index in tqdm(range(Ps_MHN.shape[1])):
@@ -74,27 +49,39 @@ for sample_index in tqdm(range(Ps_MHN.shape[1])):
         test_sample = data[sample_index]
         if test_sample[e] == 0:
             continue
-        test_sample[e] = 0
-        matches = np.all(data == test_sample[None, :], axis=1)
+        predecessor = test_sample.copy()
+        predecessor[e] = 0
+
+        matches = np.all(data == predecessor[None, :], axis=1)
 
         if not matches.any():
             continue
 
-        other_sample_index = int(np.argmax(matches))
+        predecessor_index = int(np.argmax(matches))
 
-        delta_MHN += comp(
-            Ps_MHN[:, sample_index], Ps_MHN[:, other_sample_index]
+        delta_MHN.append(
+            comp(Ps_MHN[:, sample_index], Ps_MHN[:, predecessor_index])
         )
-        delta_CBN += comp(
-            Ps_CBN[:, sample_index], Ps_CBN[:, other_sample_index]
+        delta_CBN.append(
+            comp(Ps_CBN[:, sample_index], Ps_CBN[:, predecessor_index])
         )
-        delta_baserate += comp(
-            Ps_baserate[:, sample_index], Ps_baserate[:, other_sample_index]
+        delta_baserate.append(
+            comp(
+                Ps_baserate[:, sample_index], Ps_baserate[:, predecessor_index]
+            )
         )
-        nr_pairings += 1
 
-        steps_considered.append((test_sample, data[sample_index]))
+delta_MHN = np.array(delta_MHN)
+delta_CBN = np.array(delta_CBN)
+delta_baserate = np.array(delta_baserate)
 
-print(f"MHN: {delta_MHN / nr_pairings}")
-print(f"CBN: {delta_CBN / nr_pairings}")
-print(f"baserate: {delta_baserate / nr_pairings}")
+# print mean and 95% confidence interval around the mean
+print(
+    f"MHN: {np.mean(delta_MHN)} +- {1.96*np.std(delta_MHN, ddof=1)/np.sqrt(len(delta_MHN))}"
+)
+print(
+    f"CBN: {np.mean(delta_CBN)} +- {1.96*np.std(delta_CBN, ddof=1)/np.sqrt(len(delta_CBN))}"
+)
+print(
+    f"baserate: {np.mean(delta_baserate)} +- {1.96*np.std(delta_baserate, ddof=1)/np.sqrt(len(delta_baserate))}"
+)

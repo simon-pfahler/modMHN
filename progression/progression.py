@@ -142,3 +142,13 @@ ax[2].legend(loc="lower left")
 
 plt.tight_layout()
 plt.show()
+
+
+def comp(p1, p2):
+    return np.sum(p1 * np.log(p1 / p2))  # KL divergence
+
+
+for i in range(len(active_events)):
+    print(
+        f"{active_events[i]}: {comp(Ps_MHN_progression[:,i+1],Ps_MHN_progression[:,i])}, {comp(Ps_CBN_progression[:,i+1],Ps_CBN_progression[:,i])}, {comp(Ps_baserate_progression[:,i+1],Ps_baserate_progression[:,i])}"
+    )
