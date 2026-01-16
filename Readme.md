@@ -48,6 +48,9 @@ python test_learning_score.py
 ## Progression
 The folder `progression` contains a python script `progression.py` to generate figures for the evolution of the membership probabilities along a chain of events, like Fig. 4.
 
+## Post-Analysis
+The folder `post-analysis` contains an R script `plots_and_permtests.R` to generate Oncoplots for non-small cell lung cancers and other tumors in group 11. The are shown in Fig. 6.
+
 ## oMHN classification
 The folder `oMHN_classification` includes files to perform the classification into individual subgroups.
 This code is written in python, and heavily uses the python library `fastmhn`, which can be installed [here](https://phygit.ur.de/physics/mhn/fastmhn).
