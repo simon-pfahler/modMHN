@@ -65,7 +65,8 @@ steps_considered = list()
 
 
 def comp(p1, p2):
-    return np.linalg.norm(p1 - p2)
+    m = (p1 + p2) / 2
+    return 0.5 * np.sum(p1 * np.log(p1 / m) + p2 * np.log(p2 / m))
 
 
 for sample_index in tqdm(range(Ps_MHN.shape[1])):
